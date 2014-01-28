@@ -1,0 +1,156 @@
+#!/bin/tcsh -ef
+# add 'x' to '-ef' to trace code as it is executed
+
+##### GO_FS2 - The "Easy" button #####
+##### Usage: GO_FS <subjects directory name>
+##### Feeds multiple subjects into autorecon2
+##### Requires that original scan data be placed in $SUBJECTS_DIR/_orig_
+##### 	(Place each subject's anat series in separate folders)
+
+if ( $#argv == 0 ) then
+	echo "Usage: $0 <subject dir> <additional params to pass to auto-recon> "
+	exit 1
+endif
+
+echo "\n <><><><><><><><><><><>< GO FreeSurfer! ><><><><><><><><><><><> \n"
+
+
+
+### Check if subjects directory specified ###
+if ( "$1" != "" ) then
+  set subjdir = $1
+else
+  echo "\n ERROR: No subjects directory specified \n"
+  exit 1
+endif
+
+### Set FREESURFER_HOME and SUBJECTS_DIR ###
+
+source fshome.csh
+
+if ( -e $SUBJECTS_DIR/$subjdir) then
+  setenv SUBJECTS_DIR $SUBJECTS_DIR/$subjdir
+else
+  echo "\n ERROR: Specified subjects directory does not exist \n"
+  exit 1
+endif
+
+
+### Check if original scan data exists ###
+
+if ( ! -e $SUBJECTS_DIR/_orig_ ) then
+  echo "\n ERROR: Original scan data not found. \n"
+  exit 1
+endif
+
+### disable functional tools ###
+
+setenv NO_FSFAST
+
+##### (To enable functional tools, disable the above line, enable the following:)
+##### (HAVE NOT TESTED THIS YET) (MAYBE BETTER IF NO_FSFAST ANYWAYS)
+#setenv FUNCTIONALS_DIR $FREESURFER_HOME/sessions
+#	echo "FUNCTIONALS_DIR = $FUNCTIONALS_DIR"
+##### (and add the following to ~/matlab/startup.m)
+#fsfasthome = getenv('FSFAST_HOME');
+#fsfasttoolbox = sprintf('%s/toolbox',fsfasthome');
+#path(path,fsfasttoolbox);
+
+### Set up FreeSurfer ###
+
+setenv prompt
+source $FREESURFER_HOME/FreeSurferEnv.csh
+echo ""
+
+
+
+
+
+
+
+
+
+
+
+### List out directories in _orig_ , set subj array, prompt to continue ###
+
+echo "Found the following subjects: \n"
+
+set i = 0
+set subjID
+
+foreach d ($SUBJECTS_DIR/_orig_/*)
+  @ i++
+  set subjID = ($subjID $d:t)
+  echo "   Subject "$i": " $subjID[$i]
+end
+set subjCount = $i
+
+set response
+while ($response != "n" && $response != "y")
+  echo -n "\n Process these $subjCount subjects? [y/n] > "
+  set response = $<
+end
+if ($response == "n") then
+  echo "\n Program ended by user \n"
+  exit 1
+endif
+
+
+
+
+### Run autorecon2 for each subject ###
+
+cd $SUBJECTS_DIR
+
+if ($#argv > 1) then
+	set nargs = $argv[2-$#argv]
+else
+	set nargs = ""
+endif
+
+set i = 0
+while ($i < $subjCount)
+  @ i++
+  echo "\n<><><><><><><><><><><><| NOW PROCESSING <"$subjID[$i]"> |><><><><><><><><><><><>\n"
+  recon-all -autorecon2 -autorecon3 -s $subjID[$i] $nargs
+end
+
+
+
+
+
+echo ""
+date +"Finished $0 without error at %T on %a %b %d %Y"
+echo ""
+exit 0
+
+
+
+
+
+
+
+
+
+
+
+#######################
+### Simple working loop
+#set i = 0
+#while ($i < 10)
+#	echo $i
+#	@ i++
+#end
+#######################
+
+
+
+
+#############
+### TO DO ###
+#############
+# why don't env's remain 'set' after running this? (they do after running SetUpFreeSurfer.csh or FreeSurferEnv.csh)
+# why can't FS_FAST be set up?
+
+# eliminate _orig_ checks? (replace with SUBJECTS_DIR checks)

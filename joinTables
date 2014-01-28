@@ -1,0 +1,62 @@
+#!/usr/bin/python
+
+# Import libraries
+import sys
+import os
+import array
+import string
+
+# This will temporarily hold all the data
+# from the files
+fulldataset = []
+
+files = sys.argv[1:]
+
+# List all files in the current directory
+
+for filename in files:
+
+    # Filter based on filenames
+    if (filename[-4:]=='.txt'):
+        fin = open(filename)
+        filedata = fin.readlines()
+
+        # Parse the text strings into data tokens
+        filematrix = []
+        for line in filedata:
+            filematrix.append( line.split() )
+
+        fulldataset.append(filematrix)
+
+
+# The array fulldataset is now a matrix that contains
+# (files, rows, columns)
+
+
+# Build the data into a new array, organized
+# as you need it
+outputarray = []
+irow = 0
+for row in fulldataset[0]:
+    fullrow = []
+    # Using += will add elements onto the end of an array
+    fullrow += fulldataset[0][irow]
+    for file in fulldataset:
+        # The indexing [1:] means "from the 2nd element onwards"...
+        fullrow += file[irow][1:] 
+
+    outputarray.append( fullrow )
+
+    irow += 1
+
+
+# Output the array as a string
+outputstrings = []
+fout = open("output.dat", "w")
+for row in outputarray:
+    print row
+    # The spacer between data is a space, but could be anything:
+    outputstrings.append( string.join(row, " " ) )
+    fout.write( string.join(row, " " ) + "\n" )
+
+fout.close()

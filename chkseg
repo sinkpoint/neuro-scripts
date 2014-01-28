@@ -1,0 +1,5 @@
+#!/bin/tcsh -ef
+
+tkmedit $1 brainmask.mgz lh.white -aux T1.mgz -aux-surface rh.white -segmentation aseg.mgz $FREESURFER_HOME/FreeSurferColorLUT.txt
+
+

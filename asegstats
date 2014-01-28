@@ -1,0 +1,60 @@
+#!/usr/bin/python
+
+import sys, os, subprocess, shlex
+from optparse import OptionParser
+
+options = []
+args = []
+
+def main():
+
+	filename = options.qdec
+	osubjs = options.subjs
+	output = options.output
+	meas = options.measure
+
+	if filename:
+		f = open(filename, 'r')
+		subjs = ''
+		for line in f:
+			text = line.strip()
+			if text != '' and text[0]!='#':
+				firstcol = text.split()[0]
+				if firstcol == 'fsid':
+					continue		
+				subjs += firstcol + ' '
+		f.close()
+	elif osubjs:
+		subjs = osubjs 
+	else:
+		if len(args) != 1:
+			parser.print_help()
+			sys.exit(2)	
+		dirs = listFolders(os.getcwd()+'/'+args[0])
+		subjs = ''
+		for i in dirs:
+			subjs += i+' '
+		
+
+	cmd = 'asegstats2table --subjects %s --meas %s --tablefile %s %s' % (subjs, meas, output, options.args)
+	print cmd
+
+	subprocess.Popen(shlex.split(cmd))
+
+def listFolders(dir):
+    return [name for name in os.listdir(dir)
+		if os.path.isdir(os.path.join(dir, name))]
+
+
+if __name__ == '__main__':	
+	parser = OptionParser(usage="Usage: %prog [options] dir")
+	parser.add_option("-q", "--qdec", dest="qdec", help="use subjects in a qdec table")
+	parser.add_option("-s", "--subjs", dest="subjs", help="manually pass a list of folders to process")	
+	parser.add_option("-o", "--output", dest="output", help="output filename", default='output.txt')
+	parser.add_option("-m", "--measure", dest="measure", help="What is the measurement criteria. Same as asegstats2table --meas (volume|mean|std)", default='volume')
+	parser.add_option("-a", "--args", dest="args", default='', help="Additional arguments to pass onto asegstats2table")							
+
+	(options, args) =  parser.parse_args()
+
+	main()
+

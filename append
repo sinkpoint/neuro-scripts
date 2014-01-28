@@ -1,0 +1,8 @@
+#!/usr/bin/ksh
+
+file=$1
+name=${file%.*}
+ext=${file##*.}
+newname="${name}${2}.${ext}"
+echo $newname
+mv $file $newname

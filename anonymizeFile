@@ -1,0 +1,2 @@
+AnonymizeNoLoad filein=$1 rubout=0008-0090,0008-1060,0008-1070
+

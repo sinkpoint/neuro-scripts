@@ -1,0 +1,92 @@
+#!/bin/tcsh -ef
+# add 'x' to '-ef' to trace code as it is executed
+
+
+###### USAGE:
+###### > mr2dcm [o_dir] [prefix]
+###### |   [o_dir] = directory in which original files are located (must be within ~/freesurfer/subjects)	cyst-DTI
+###### |   [prefix] = character string preceding numbers in .MR filenames					dti_
+######
+###### Outputs into o_dir/renamed/
+
+
+### Check if arguments are specified ###
+if ( "$1" != "" ) then
+  set oDir = $1
+else
+  echo "\n ERROR: Directory for original files not specified \n"
+  exit 1
+endif
+
+if ( "$2" != "" ) then
+  set prefix = $2
+else
+  echo "\n ERROR: Prefix for original files not specified \n"
+  exit 1
+endif
+
+
+### Set FREESURFER_HOME and SUBJECTS_DIR ###
+
+setenv FREESURFER_HOME /home/omid/freesurfer
+
+if ( -e $FREESURFER_HOME/subjects/$oDir) then
+  setenv O_DIR $FREESURFER_HOME/subjects/$oDir
+else
+  echo "\n ERROR: Specified directory does not exist \n"
+  exit 1
+endif
+
+
+
+### List out files, prompt to continue ###
+
+#echo "Found the following files: \n"
+
+set i = 0
+
+foreach f ($O_DIR/$prefix*)
+  @ i++
+#  echo $f
+end
+set fCount = $i
+
+set response
+while ($response != "n" && $response != "y")
+  echo -n "\n Found $fCount files. Continue? [y/n] > "
+  set response = $<
+end
+if ($response == "n") then
+  echo "\n Program ended by user \n"
+  exit 1
+endif
+
+
+
+### Rename files to .dcm ###
+
+mkdir $O_DIR/renamed
+echo "\n    Renaming files from .mr to .dcm"
+
+foreach f ($O_DIR/$prefix*)
+  cp $f $O_DIR/renamed/$prefix*.dcm
+  echo "$f:t renamed to $prefix*.dcm" >> $O_DIR/renamed/renameDCM.log
+end
+
+echo ""
+date +"Finished $0 without error at %T on %a %b %d %Y"
+echo " See $O_DIR/renameDCM.log for details \n"
+exit 0
+
+
+
+
+
+### following rename loop is simpler, but "reads in" files in improper order ###
+#set i = 0
+#foreach f ($O_DIR/*)
+#  @ i++
+#  set xxx = `printf %03d $i`
+#  cp $f $O_DIR/renamed/dti.$xxx
+#  echo "$f:t renamed to dti.$xxx" >> $O_DIR/renameDCM.log
+#end

@@ -1,0 +1,5 @@
+#!/bin/tcsh -ef
+echo "[subj]: ${1} [label]: ${2} [side]: ${3}"
+mris_anatomical_stats -l ${2}.label -t ${3}.thickness -b -f ${SUBJECTS_DIR}/${1}/stats/${2}.stats $1 $3
+
+

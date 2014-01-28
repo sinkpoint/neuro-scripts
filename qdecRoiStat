@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+import sys
+import os
+
+"""
+This scripts depends on the script roiStats to geneerate stats for
+all the roi labels defined and mapped to each subjects in qdec.
+
+It reads the qdec table.dat file and a file that defines a list of roi names and the hemisphere involved.
+
+SUBJECTS_DIR should already be set properly
+"""
+
+if len(sys.argv) < 3:
+	print "Usage: %s <qdec.table.dat> <labels.dat>" % sys.argv[0]
+	sys.exit(0)
+
+filename=sys.argv[1]
+labelfile=sys.argv[2]
+f = open(filename, 'r')
+g = open(labelfile, 'r')
+
+labelmap = []
+print 'ROI LABELS:'
+for line in g:
+	text = line.strip()
+	if text != '' and text[0] !='#':
+		cols = text.strip()
+		#print "%s	%s" % (cols[0], cols[1])
+		labelmap.append(cols)
+
+print ''
+print '------------------------------'
+print ''
+
+for line in f:
+	text = line.strip()
+	if text != '' and text[0]!='#':
+		firstcol = text.split()[0]
+		if firstcol == 'fsid':
+			continue
+		
+		for row in labelmap:
+			hemi = row.split(".")[0]
+			cmd = 'roiStat %s %s %s' % (firstcol, row, hemi)
+			print ''
+			print 'executing %s' % cmd
+			os.system(cmd)
+
+f.close()
+g.close()

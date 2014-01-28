@@ -1,0 +1,27 @@
+#!/bin/tcsh -ef
+if ($# < 1) then
+	echo "arg order: dwi label# fa frac radius minlen step_size tensor_file seed_file"  
+	exit 1
+endif
+
+if( $# == 9) then
+	seedTend2Points.py -i $9
+endif
+
+set seed="$2"
+set fiberFile="xst/${seed}.vtk"
+
+if ( ! -d xst ) then
+	mkdir xst
+endif
+echo "tend2 fiber -i $1 -dwi -wspo -ns seeds/IC"$seed".txt -o "$fiberFile" -ap \
+ -t 2evec0 -stop aniso:cl2,$3 frac:$4 radius:$5 minlen:$6 -n rk4 \
+ -k cubic:0.0,0.5 \
+ -v 2 -step $7 "
+ 
+tend2 fiber -i $1 -dwi -wspo -ns seeds/IC"$seed".txt -o "$fiberFile" -ap \
+ -t 2evec0 -stop aniso:cl2,$3 frac:$4 radius:$5 minlen:$6 -n rk4 \
+ -k cubic:0.0,0.5 \
+ -v 2 -step $7 
+echo "copy Tensors"
+copyTensors.py -t "$8" -f "$fiberFile" -o "$fiberFile"

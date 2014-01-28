@@ -1,0 +1,3 @@
+#!/bin/tcsh -ef
+randomise -i all_FA_skeletonised -o tbss -m $1 -d design.mat -t design.con -n 500 --T2 -V
+

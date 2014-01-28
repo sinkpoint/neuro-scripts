@@ -1,0 +1,63 @@
+#!/usr/bin/python
+
+import sys, os, subprocess, shlex
+from optparse import OptionParser
+
+options = []
+args = []
+
+def main():
+
+	filename = options.qdec
+	osubjs = options.subjs
+	roi = options.parc
+	hemi = options.hemi
+	output = options.output
+	meas = options.measure
+
+	if filename:
+		f = open(filename, 'r')
+		subjs = ''
+		for line in f:
+			text = line.strip()
+			if text != '' and text[0]!='#':
+				firstcol = text.split()[0]
+				if firstcol == 'fsid':
+					continue		
+				subjs += firstcol + ' '
+		f.close()
+	elif osubjs:
+		subjs = osubjs 
+	else:
+		if len(args) != 1:
+			parser.print_help()
+			sys.exit(2)	
+		dirs = listFolders(os.getcwd()+'/'+args[0])
+		subjs = ''
+		for i in dirs:
+			subjs += i+' '
+		
+
+	cmd = 'aparcstats2table --subjects %s --parc %s --meas %s --hemi %s --tablefile %s' % (subjs, roi, meas, hemi, output)
+	print cmd
+
+	subprocess.Popen(shlex.split(cmd))
+
+def listFolders(dir):
+    return [name for name in os.listdir(dir)
+		if os.path.isdir(os.path.join(dir, name))]
+
+
+if __name__ == '__main__':	
+	parser = OptionParser(usage="Usage: %prog [options] dir")
+	parser.add_option("-q", "--qdec", dest="qdec", help="use subjects in a qdec table")
+	parser.add_option("-s", "--subjs", dest="subjs", help="manually pass a list of folders to process")	
+	parser.add_option("-p", "--parc", dest="parc", help="Which parcellation to gather data from. Same as aparcstats2table --parc. default 'aparc'", default='aparc')
+	parser.add_option("-e", "--hemisphere", dest="hemi", help="Hemisphere? 'lh' or 'rh', default is 'lh'", default='lh')
+	parser.add_option("-o", "--output", dest="output", help="output filename", default='output.txt')
+	parser.add_option("-m", "--measure", dest="measure", help="What is the measurement criteria. Same as aparcstats2table --meas (thickness|area|volume)", default='area')			
+
+	(options, args) =  parser.parse_args()
+
+	main()
+
