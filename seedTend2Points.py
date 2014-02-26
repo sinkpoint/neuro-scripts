@@ -39,8 +39,12 @@ def run():
 	FILE = f.read()
 	f.close()	
 	
-
-	datatype = numpy.short
+ 
+	if params['type'][0] == 'float':
+		datatype = numpy.float32
+	elif params['type'][0] == 'short':
+		datatype = numpy.short
+         
 	size = dimX*dimY*dimZ
 	shape = (dimX, dimY, dimZ)
 	data = numpy.fromstring(FILE, dtype=datatype)

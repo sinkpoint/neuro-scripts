@@ -1,5 +1,7 @@
 #!/bin/sh -f
 
+#	Modified by David Qixiang Chen
+
 #   slicesdir - call slicer on all input images and produce web page output
 #
 #   Stephen Smith, FMRIB Image Analysis Group
@@ -74,6 +76,7 @@ if [ "$1" = "" ] ; then
     echo "-p <image> : use <image> as red-outline image on top of all images in <filelist>"
     echo "-e <thr>   :  use the specified threshold for edges (if >0 use this proportion of max-min, if <0, use the absolute value)"
     echo "-S         : output every second axial slice rather than just 9 ortho slices"
+    echo "-s <float>	 : output only one axial slice at a specific location."
     exit 1
 fi
 
@@ -126,6 +129,10 @@ if [ "$1" = "-S" ] ; then
     sliceropts="-S 2 1600 slicesdir/grota.png"
     convertopts="slicesdir/grota.png"
     shift
+elif [ "$1" = "-s" ]; then
+	sliceropts="-L -z $2 slicesdir/grota.png"
+	convertopts="slicesdir/grota.png"
+    shift 2
 fi
 
 
@@ -138,23 +145,23 @@ while [ $i -lt $number ] ; do
     echo $A
 
     if [ $Compare = 0 ] ; then
-	${FSLDIR}/bin/slicer $A $pairimage -s 1 $sliceropts
-	Q=`echo $A | sed "s/\//_/g"`
+		${FSLDIR}/bin/slicer $A $pairimage -s 1 $sliceropts
+		Q=`echo $A | sed "s/\//_/g"`
     else
-	B=`${FSLDIR}/bin/remove_ext $2`
-	${FSLDIR}/bin/slicer $A $B -s 1 $sliceropts
-	Q=`echo $A | sed "s/\//_/g"`_to_`echo $B | sed "s/\//_/g"`
+		B=`${FSLDIR}/bin/remove_ext $2`
+		${FSLDIR}/bin/slicer $A $B -s 1 $sliceropts
+		Q=`echo $A | sed "s/\//_/g"`_to_`echo $B | sed "s/\//_/g"`
     fi
 
     ${FSLDIR}/bin/pngappend $convertopts slicesdir/${Q}.png
     /bin/rm -f slicesdir/grot?.png
-    echo '<a href="'${Q}'.png"><img src="'${Q}'.png" WIDTH='$Width' >' ${Q}'</a><br>' >> slicesdir/index.html
+    echo '<a href="'${Q}'.png"><img src="'${Q}'.png">' ${Q}'</a><br>' >> slicesdir/index.html
 
     shift
     i=`echo "$i 1 + p" | dc -`
     if [ $Compare = 1 ] ; then
-	shift
-	i=`echo "$i 1 + p" | dc -`
+		shift
+		i=`echo "$i 1 + p" | dc -`
     fi
 done
 
