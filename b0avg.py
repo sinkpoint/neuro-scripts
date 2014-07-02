@@ -17,7 +17,8 @@ class B0avg:
         ofile = self.options.output
         
         reader = NrrdReader()
-        iparams =  reader.getFileContent(ifile)
+        iparams, bindata =  reader.getFileContent(ifile)
+	#iparams = iparams._data
         
         b0n = iparams['b0num']
         print "%d b0 to be averaged" % b0n

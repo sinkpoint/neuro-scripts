@@ -13,7 +13,7 @@ def run(options, args):
 	
 	grad = np.column_stack((bvec, bval))
 	
-	print "origina"
+	print "original"
 	print grad
 	# invert GE grad axis for mrtrix
 	grad[:,0]	*=  -1

@@ -45,27 +45,31 @@ else
 fi
 
 rm mask.mif
-average $DWI -axis 3 - | threshold - - | median3D - - | median3D - mask.mif
-rm dt.mif
-dwi2tensor $DWI dt.mif -grad $GRAD
-rm fa.mif
-tensor2FA dt.mif - | mrmult - mask.mif fa.mif
-rm ev.mif
-tensor2vector dt.mif - | mrmult - fa.mif ev.mif
-rm sf.mif
-erode mask.mif -npass 3 - | mrmult fa.mif - - | threshold - -abs 0.7 sf.mif
-rm response.txt
-estimate_response $DWI sf.mif response.txt -grad $GRAD
-disp_profile -response response.txt &
+#average $DWI -axis 3 - | threshold -percent 5 - - | median3D - - | median3D - mask.mif
+bet2 Motion_Corrected_DWI_nobet.nii.gz dwibet -m -n -f 0.1
+mrconvert dwibet_mask.nii.gz mask.mif -datatype Bit
 
-while true; do
-read -p "Response profile satisfactory? Continue with CSD estimate?" yn
-	case $yn in
-		[Yy]* ) break;;
-		[Nn]* ) exit;;
-		* ) echo "Please answer yes or no.";; 
-	esac
-done
+# rm dt.mif
+# dwi2tensor $DWI dt.mif -grad $GRAD
+# rm fa.mif
+# tensor2FA dt.mif - | mrmult - mask.mif fa.mif
+# rm ev.mif
+# tensor2vector dt.mif - | mrmult - fa.mif ev.mif
+# rm sf.mif
+# erode mask.mif -npass 3 - | mrmult fa.mif - - | threshold - -abs 0.7 sf.mif
+# rm response.txt
+dwi2response -nthreads 8 -mask mask.mif -grad $GRAD $DWI response.txt 
+#disp_profile -response response.txt &
+
+#while true; do
+#read -p "Response profile satisfactory? Continue with CSD estimate?" yn
+#	case $yn in
+#		[Yy]* ) break;;
+#		[Nn]* ) exit;;
+#		* ) echo "Please answer yes or no.";; 
+#	esac
+#done
 
 rm CSD8.mif
-csdeconv $DWI response.txt -lmax 8 -mask mask.mif CSD8.mif -grad $GRAD
+#csdeconv $DWI response.txt -lmax 8 -mask mask.mif CSD8.mif -grad $GRAD
+dwi2fod -nthreads 8 -mask mask.mif -grad $GRAD $DWI response.txt CSD8.mif 

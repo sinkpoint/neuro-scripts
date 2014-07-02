@@ -28,6 +28,9 @@ class NrrdHeader:
     def getKeys(self):
         return self._data.keys()
 
+    def isDTMR(self):
+        return self.b0num > 0
+
     def correctSpaceRas(self):
         spaceraw = self.getValue('space')[0]
         space = spaceraw.split('-')
@@ -101,16 +104,26 @@ class NrrdReader:
     b0num = 'b0num'
 
     def getFileAsHeader(self, filename):
-        params = self.getFileContent(filename)
+        params, bindata = self.getFileContent(filename)
         hobj = NrrdHeader(params)
-        return hobj
+        return hobj, bindata
 
     def getFileContent(self, filename):
         TFILE = open(filename, 'r')
+        strbuf =""
+        bindata = None
+        if filename.find("nrrd") > -1:
+            data = TFILE.read().split("\n\n",1)
+            strbuf = data[0].split('\n')
+            bindata = data[1]
+        else:
+            strbuf = TFILE.read().split('\n')
+
+        TFILE.close()
+
         params = OrderedDict()
 
-        while ( TFILE ):
-            line = TFILE.readline()
+        for line in strbuf:
             if len(line) == 0:
                 break;
             line = line.strip()
@@ -163,8 +176,7 @@ class NrrdReader:
             dwivec = params[self.grdkey]
             params[self.grdkey] = np.array(dwivec)
 
-        TFILE.close()
-        return params
+        return params, bindata
 
     def asDtype(self, dtype, value):
         if dtype=='float':

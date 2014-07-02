@@ -57,8 +57,11 @@ do
 	esac
 done
 
-tensor_file="$output_dir/$prefix$tensor_file"
-baseline_file="$output_dir/${prefix}baseline"
+if [ -z "$output_dir" ]
+then
+	output_dir=`pwd`
+fi
+echo "Output to "$output_dir""
 
 if [ $OPTIND -eq 1 ]
 then
@@ -66,31 +69,33 @@ then
 	exit
 fi
 
-if [ -n "$dwi_file" ] && [ -n "$label_file" ]
+if [ -z "$dwi_file" ] && [ -z "$label_file" ]
 then
 	usage
 	exit
 fi
 
-if [ -n "$tensor_file" ]
+if [ -z "$tensor_file" ]
 then
 	tensor_file="dti.nhdr"
 fi
 
-
+tensor_file="$output_dir/$prefix$tensor_file"
+baseline_base="$output_dir/${prefix}baseline"
+baseline_file="$baseline_base.nrrd"
 
 if [ -n "$dwi_file" ]
 then
 	echo "DO DWI TO TENSOR"
 	touch $tensor_file
 	touch $baseline_file
-	$cli/DWIToDTIEstimation --shiftNeg -e LS $dwi_file $tensor_file $baseline_file.nrrd
+	$cli/DWIToDTIEstimation --shiftNeg -e LS $dwi_file $tensor_file $baseline_file
 	
 	$cli/DiffusionTensorScalarMeasurements -e FractionalAnisotropy $tensor_file  "$output_dir"/${prefix}FA.nrrd
 	$cli/DiffusionTensorScalarMeasurements -e ParallelDiffusivity $tensor_file  "$output_dir"/${prefix}AD.nrrd
 	$cli/DiffusionTensorScalarMeasurements -e PerpendicularDiffusivity $tensor_file  "$output_dir"/${prefix}RD.nrrd
 	
-	$cli/ResampleScalarVolume "$baseline_file.nrrd" "$baseline_file.nii.gz"
+	$cli/ResampleScalarVolume "$baseline_file" "$baseline_base.nii.gz"
 	$cli/ResampleScalarVolume "$output_dir"/${prefix}FA.nrrd "$output_dir"/${prefix}FA.nii.gz
 	$cli/ResampleScalarVolume "$output_dir"/${prefix}AD.nrrd "$output_dir"/${prefix}AD.nii.gz
 	$cli/ResampleScalarVolume "$output_dir"/${prefix}RD.nrrd "$output_dir"/${prefix}RD.nii.gz	

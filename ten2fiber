@@ -5,7 +5,7 @@ if ($# < 1) then
 endif
 
 if( $# == 9) then
-	seedTend2Points.py -i $9
+	seedTend2Points.py -i $9 -r -n 20
 endif
 
 set seed="$2"

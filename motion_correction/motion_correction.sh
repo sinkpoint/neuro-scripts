@@ -31,12 +31,13 @@ OPTIND=0
 
 while getopts "a:vo:" OPTION
 do
-	echo "opt $OPTION arg $OPTARG ind $OPTIND"
+#	echo "opt $OPTION arg $OPTARG ind $OPTIND"
 	case $OPTION in
 		a)
 			affix=$OPTARG
 			;;
 		v)
+			echo 'motion_cor only'
 			MOTION_COR_ONLY=true
 			;;
 		o)
@@ -48,7 +49,7 @@ do
 			;;
 	esac
 done
-	echo $OPTION $OPTARG $OPTIND
+#echo $OPTION $OPTARG $OPTIND
 
 if [ -n "${!OPTIND}" ]
 	then scan="${!OPTIND}"
