@@ -10,6 +10,7 @@ import numpy, math
 import nrrd
 import sys
 import os
+import time
 import gzip
 from StringIO import StringIO
 
@@ -59,13 +60,17 @@ def run():
     print '------------------- tensor info -----------------------'
     #tensors = numpy.swapaxes(tensors,0,3)
 
-    print '# shape: ',tensors.shape
+    print '# shape: ',tensors.shape,'\n'
 
     pointTensors = []
     #p = points[0]
     idx = []
 
-    for p in points:
+    points_len = len(points)
+    i = 0   
+    for i,p in enumerate(points):
+        sys.stdout.write('# calculate ijk indices %d/%d \r' % (i, points_len))
+
         index = getVolumeIndex(p, origin, vspace_inv, dirs)
         idx.append(index)
         tensormat = tensors[index[2],index[1],index[1]]
@@ -73,10 +78,10 @@ def run():
 
         if is_tensor:
             tensormat = tensormat.reshape([3,3])
-        print tensormat
+        #print tensormat        
         #tensormat = tensormat * vspacemat
         pointTensors.append(list(numpy.ravel(tensormat)))
-
+    sys.stdout.write('\n')
     writeFiber(pointTensors, header)
     idx = numpy.array(idx)
     print '# min corner= ',numpy.amin(idx,axis=0)
@@ -125,7 +130,7 @@ def getVolumeIndex(point, origin, vmat, dirs):
     point = numpy.array(point)
     origin = numpy.array(origin)
 
-    print '#xyz= ',point,
+    #print '#xyz= ',point,
 
     # adjust for origin offeset
     point = point - origin
@@ -136,7 +141,7 @@ def getVolumeIndex(point, origin, vmat, dirs):
     # adjust to ijk index (0 start), and convert to int
     vpoint = vpoint - 1
     vpoint = numpy.ravel(numpy.asarray(vpoint, dtype=numpy.int))
-    print '  #ijk= ',vpoint
+    #print '  #ijk= ',vpoint
 
     return vpoint
 

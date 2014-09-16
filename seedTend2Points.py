@@ -35,9 +35,10 @@ def run():
     radius = 0.5
     spacing = options.spacing
 
-
     if params['type'][0] == 'float':
         datatype = numpy.float32
+    elif params['type'][0] == 'double':
+        datatype = numpy.double 
     elif params['type'][0] == 'short':
         datatype = numpy.short
 

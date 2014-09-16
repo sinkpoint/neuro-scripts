@@ -45,8 +45,9 @@ else
 fi
 
 rm mask.mif
-#average $DWI -axis 3 - | threshold -percent 5 - - | median3D - - | median3D - mask.mif
-bet2 Motion_Corrected_DWI_nobet.nii.gz dwibet -m -n -f 0.1
+#average $DWI -axis 3 - | threshold -percent 5 - - | median3D - - | median3D - mask.mif0
+#dwi2mask -g $GRAD $DWI mask.mif
+bet2 $DWI dwibet -m -n -f 0.1
 mrconvert dwibet_mask.nii.gz mask.mif -datatype Bit
 
 # rm dt.mif

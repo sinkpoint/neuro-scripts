@@ -176,7 +176,7 @@ class Eddycor:
             fin=v
             metric='MI[%s,%s,1,32]' % (fin, ref)
             trans='Affine[0.75]'
-            conv='[100x100x100,1e-6,5]'
+            conv='[1000x1000x1000,1e-6,5]'
             shrinkf='4x2x1'
             smoothsig='4x2x1'
             #cmd='antsRegistration -d 3 --output '+output+' --metric '+metric+' --transform '+trans+' --convergence '+conv+' --shrink-factors '+shrinkf+' --smoothing-sigmas '+smoothsig+' --use-estimate-learning-rate-once'

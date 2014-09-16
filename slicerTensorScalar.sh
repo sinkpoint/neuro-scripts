@@ -94,11 +94,14 @@ then
 	$cli/DiffusionTensorScalarMeasurements -e FractionalAnisotropy $tensor_file  "$output_dir"/${prefix}FA.nrrd
 	$cli/DiffusionTensorScalarMeasurements -e ParallelDiffusivity $tensor_file  "$output_dir"/${prefix}AD.nrrd
 	$cli/DiffusionTensorScalarMeasurements -e PerpendicularDiffusivity $tensor_file  "$output_dir"/${prefix}RD.nrrd
+	$cli/DiffusionTensorScalarMeasurements -e Trace $tensor_file  "$output_dir"/${prefix}Trace.nrrd
 	
 	$cli/ResampleScalarVolume "$baseline_file" "$baseline_base.nii.gz"
 	$cli/ResampleScalarVolume "$output_dir"/${prefix}FA.nrrd "$output_dir"/${prefix}FA.nii.gz
 	$cli/ResampleScalarVolume "$output_dir"/${prefix}AD.nrrd "$output_dir"/${prefix}AD.nii.gz
-	$cli/ResampleScalarVolume "$output_dir"/${prefix}RD.nrrd "$output_dir"/${prefix}RD.nii.gz	
+	$cli/ResampleScalarVolume "$output_dir"/${prefix}RD.nrrd "$output_dir"/${prefix}RD.nii.gz
+	$cli/ResampleScalarVolume "$output_dir"/${prefix}Trace.nrrd "$output_dir"/${prefix}Trace.nii.gz
+	fslmaths "$output_dir"/${prefix}Trace -div 3 "$output_dir"/${prefix}MD
 fi
 
 if [ -n "$label_file" ]
