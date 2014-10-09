@@ -200,7 +200,7 @@ class NrrdReader:
     def getVals(self,input, dtype='str'):
         if input.find('(') > -1:
             input = input.replace('(','|')
-            input = input.replace(')','')
+            input = input.replace(')','|')
             input = input.split('|')
         else:
             input = input.split(' ')
@@ -208,6 +208,7 @@ class NrrdReader:
         res = []
         for i in input:
             row=[]
+            i = i.strip()
             if i == '':
                 continue
             if i.find(',') > -1:
@@ -222,6 +223,7 @@ class NrrdReader:
         if len(res) == 1:
             a = np.array(res)
             res = np.ravel(a)
+        print res
         return res
 
 class NrrdWriter:

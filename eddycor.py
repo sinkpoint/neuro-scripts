@@ -44,8 +44,8 @@ class Eddycor:
         IS_PROCESSING_FILE = "isProcessing.tmp"
         DONE_PROCESSING_FILE = "doneProcessing.tmp"
 
-        if os.path.isfile(IS_PROCESSING_FILE):
-            print dir + ' is already being processed, skipping'
+        if os.path.isfile(IS_PROCESSING_FILE) and not self.force:
+            print dir + ' is being processed, skipping'
             return
         elif os.path.isfile(DONE_PROCESSING_FILE) and not self.force:
             print dir + ' is already processed, skipping'
@@ -146,11 +146,17 @@ class Eddycor:
 
 
         motioncorCmd = "motion_correction.sh "
-        if self.options.veconly:
+        if self.options.is_veconly:
             motioncorCmd += "-v "
         motioncorCmd += subjname
 
         os.system(motioncorCmd)
+
+        #flip vectors
+        import flipGradVectors as fgv        
+        ax = options.invert_vecs
+        fgv.flip_file('DWI_CORRECTED.nhdr','DWI_CORRECTED.nhdr', axis=ax)
+        fgv.flip_file('newdirs.dat','newdir.dat', axis=ax)
 
         os.chdir('..')
 
