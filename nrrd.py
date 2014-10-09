@@ -223,7 +223,6 @@ class NrrdReader:
         if len(res) == 1:
             a = np.array(res)
             res = np.ravel(a)
-        print res
         return res
 
 class NrrdWriter:
@@ -250,7 +249,7 @@ class NrrdWriter:
                     i = self.formatOutput(i, brac=False, dim=' ')
                     line = "%s_%04d:=%s\n" % (k, c, i)
                     c+=1
-                    print line,
+                    #print line,
                     FILE.write(line)
                     is_write=False
             else:
@@ -264,7 +263,7 @@ class NrrdWriter:
                     val = self.formatOutput(val,brac=False, dim=' ')
                 line = "%s%s%s\n" % (k,eq,val)
             if is_write:
-                print line,
+                #print line,
                 FILE.write(line)
 
         FILE.close()
