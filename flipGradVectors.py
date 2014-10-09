@@ -11,17 +11,17 @@ import numpy as np
 import nrrd
 
 def run(options, args):
-	if not options.dims:
-		dims = [0]
+	if not options.axis:
+		axis = [1]
 	else :
-		dims = [ int(i) for i in options.dims.split(',') ]
+		axis = [ int(i) for i in options.axis.split(',') ]
 
 	infile = args[0]
 	outfile = args[1]
 
-	flip_file(infile, outfile, indices=dims)
+	flip_file(infile, outfile, indices=axis)
 
-def flip_file(infile, outfile, indices=[0]):
+def flip_file(infile, outfile, indices=[1]):
 
 	if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
 		header, data = nrrd.NrrdReader().getFileAsHeader(infile)
@@ -53,7 +53,7 @@ def flip_vecs(dvecs, idims):
 
 if __name__ == '__main__':
     parser = OptionParser(usage="Usage: %prog [options] <input> <output>")
-    parser.add_option("-a", "--axis", dest="dims",help="Dimensions to invert, comma-separated")
+    parser.add_option("-a", "--axis", dest="axis",help="Axis to invert, comma-separated, default is 1 (Y)")
     parser.add_option("-n", "--dry-run", action='store_true',dest="dryrun", help="Dry run, don't save output",default=False)
     options, args =  parser.parse_args()
 
