@@ -56,17 +56,17 @@ class Eddycor:
 
         self.doPreprocess(dir)
 
-        if (options.motion):
+        if (options.is_fsl):
             self.doFSLCorrection(dir)
-        elif (options.ants):
+        elif (options.is_ants):
             self.doAntsCorrection(dir)
-        elif (options.nrrd):
+        elif (options.is_nrrd):
             self.doNrrdEddyCor(dir)
-        elif (options.all):
+        elif (options.is_all):
             self.doNrrdEddyCor(dir)
             self.doFSLCorrection(dir)
+            self.doAntsCorrection(dir)            
         else:
-            self.doNrrdEddyCor(dir)
             self.doFSLCorrection(dir)
 
         os.remove(IS_PROCESSING_FILE)
@@ -110,14 +110,14 @@ class Eddycor:
 
     def doNiftiPrepare(self, dir):
         #dcm2nii = "dcm2nii -d N -e N -f Y -i N -o . ../dicom/*_0.dcm"
-        nrrdname = self.subjName
+        subjname = self.subjName
         if not os.path.isdir("nifti"):
             print 'make nifti folder'
             os.mkdir('nifti')
         os.chdir("nifti")
 
 
-        if not os.path.isfile(nrrdname+'.nii.gz'):
+        if not os.path.isfile(subjname+'.nii.gz'):
             print 'convert dicom to nifti'
             cmd = "dcm2nii -d N -e N -f Y -i N -p N -o . ../dicom/%s" % (self.options.dicom_filter)
             os.system(cmd)
@@ -126,29 +126,29 @@ class Eddycor:
             nii_file = glob("*.nii.gz")[0]
             base = os.path.splitext(os.path.splitext(nii_file)[0])[0]
 
-            os.rename(base+".nii.gz", nrrdname+".nii.gz")
-            os.rename(base+".bvec", nrrdname+".bvec")
-            os.rename(base+".bval", nrrdname+".bval")
+            os.rename(base+".nii.gz", subjname+".nii.gz")
+            os.rename(base+".bvec", subjname+".bvec")
+            os.rename(base+".bval", subjname+".bval")
         os.chdir('..')
 
     def doFSLCorrection(self, dir, veconly=False):
         self.doNiftiPrepare(dir)
         os.chdir("nifti")
-        nrrdname = self.subjName
+        subjname = self.subjName
 
 
-            #cmd = "DWIConvert --inputDicomDirectory ../dicom --outputVolume %s.nii.gz --conversionMode DicomToFSL" % (nrrdname)
+            #cmd = "DWIConvert --inputDicomDirectory ../dicom --outputVolume %s.nii.gz --conversionMode DicomToFSL" % (subjname)
 
 
 #        else:
-#            cmd = "DWIConvert --inputVolume ../nrrd/%s.nhdr --outputVolume %s.nii.gz --conversionMode NrrdToFSL --outputBVectors %s.bvec --outputBValues %s.bval" % (nrrdname, nrrdname, nrrdname, nrrdname)
+#            cmd = "DWIConvert --inputVolume ../nrrd/%s.nhdr --outputVolume %s.nii.gz --conversionMode NrrdToFSL --outputBVectors %s.bvec --outputBValues %s.bval" % (subjname, subjname, subjname, subjname)
 #            print 'convert nrrd to nifti'
 
 
         motioncorCmd = "motion_correction.sh "
         if self.options.veconly:
             motioncorCmd += "-v "
-        motioncorCmd += nrrdname
+        motioncorCmd += subjname
 
         os.system(motioncorCmd)
 
@@ -208,12 +208,13 @@ if __name__ == '__main__':
     parser.add_option("-s", "--search", dest="search", default='*DTI*', help="DTI dir name to search for. i.e *DTI*")
     parser.add_option("-d", "--dti_dir", dest="dir", help="Only process this directory, if set will ignore -s options and any arg supplied")
     parser.add_option("-n", "--name", dest="name", help="Base subject name for beautifying output")
-    parser.add_option("-m", "--fsl", action="store_true", dest="motion", help="Perform motion correction involving only FSL")
-    parser.add_option("-t", "--ants", action="store_true", dest="ants", help="Perform motion correction using ANTs")
-    parser.add_option("-v", "--veconly", action="store_true", dest="veconly", help="Assumes FLIRT has already been done. Perform vector calculation only")
-    parser.add_option("-r", "--nrrd", action="store_true", dest="nrrd", help="Perform tend eddy current only")
+    parser.add_option("-m", "--fsl", action="store_true", dest="is_fsl", help="Perform motion correction involving only FSL")
+    parser.add_option("-t", "--ants", action="store_true", dest="is_ants", help="Perform motion correction using ANTs")
+    parser.add_option("-v", "--veconly", action="store_true", dest="is_veconly", help="Assumes registrations has already been done. Perform vector calculation only")
+    parser.add_option("-i", "--invert_vecs", dest="invert_vecs", default='1', help="Invert the final gradient vectors along an axis, comma-separated, i.e 0,1,2 for x,y,z; default is 1 for Y axis.")
+    parser.add_option("-r", "--nrrd", action="store_true", dest="is_nrrd", help="Perform tend eddy current only")
 
-    parser.add_option("-a", "--all", action="store_true", dest="all", help="Perform all correction steps")
+    parser.add_option("-a", "--all", action="store_true", dest="is_all", help="Perform all correction steps")
     parser.add_option("-p", "--skip", action="store_true", dest="skip", help="Skip folders that contain processed files")
     parser.add_option("-f", "--force", action="store_true", dest="force", help="Force run even if already done running on this subject")
     parser.add_option("-z", "--dicom_filter", dest="dicom_filter", default='*.dcm', help="String used to search for dicoms to convert, default=*.dcm")

@@ -16,14 +16,16 @@ def run(options, args):
 	print "original"
 	print grad
 	# invert GE grad axis for mrtrix
-	grad[:,0]	*=  -1
-	
-#	print grad[:,1]
-	grad[:,1]	*=  -1	
-	
-	print "corrected"
-	print "------------------------------"
-	print grad
+
+	if options.invert:
+		grad[:,0]	*=  -1
+		
+	#	print grad[:,1]
+		grad[:,1]	*=  -1	
+		
+		print "corrected"
+		print "------------------------------"
+		print grad
 	
 	np.savetxt(options.out, grad, fmt="%10.6f")
     
@@ -32,6 +34,7 @@ if __name__ == '__main__':
 	parser = OptionParser(usage="Usage: %prog [options] <subject_dir>")
 	parser.add_option("-v", "--bvec", dest="bvec")
 	parser.add_option("-a", "--bval", dest="bval")
+	parser.add_option("-f", "--invert_off", action="store_false", dest="invert", default=True)
 	parser.add_option("-o", "--out", dest="out", default="grad.txt")
 	(options, args) = parser.parse_args()
 

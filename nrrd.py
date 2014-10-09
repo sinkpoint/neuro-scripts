@@ -138,6 +138,9 @@ class NrrdReader:
             else:
                 key,val = line.split(':')
                 key = key.strip()
+                if key=='space' and params.has_key('space') and params['space']!='':
+                    continue
+
                 val = val.replace('=','').strip()
 
 
@@ -161,13 +164,17 @@ class NrrdReader:
                         params[self.grdkey] = []
                     if not params.has_key(self.b0num):
                         params[self.b0num] = 0
+
+                    params[self.grdkey].append(val)
+
                     if val[0] == 0 and val[1] == 0 and val[2] == 0:
                         #only want one b0 line, very hacky
-                        if params[self.b0num] < 1:
-                            params[self.grdkey].append(val)
+                        #if params[self.b0num] < 1:
+                        #    params[self.grdkey].append(val)                        
                         params[self.b0num] += 1
-                    else:
-                        params[self.grdkey].append(val)
+                        
+                    #else:
+                    #    params[self.grdkey].append(val)
 
                 else:
                     params[key]= val

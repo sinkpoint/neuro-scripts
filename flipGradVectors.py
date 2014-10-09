@@ -53,7 +53,7 @@ def flip_vecs(dvecs, idims):
 
 if __name__ == '__main__':
     parser = OptionParser(usage="Usage: %prog [options] <input> <output>")
-    parser.add_option("-d", "--dimeinsion", dest="dims",help="Dimensions to invert, comma-separated")
+    parser.add_option("-a", "--axis", dest="dims",help="Dimensions to invert, comma-separated")
     parser.add_option("-n", "--dry-run", action='store_true',dest="dryrun", help="Dry run, don't save output",default=False)
     options, args =  parser.parse_args()
 
