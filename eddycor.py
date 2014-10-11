@@ -155,8 +155,9 @@ class Eddycor:
         #flip vectors
         import flipGradVectors as fgv        
         ax = options.invert_vecs
-        fgv.flip_file('DWI_CORRECTED.nhdr','DWI_CORRECTED.nhdr', axis=ax)
-        fgv.flip_file('newdirs.dat','newdir.dat', axis=ax)
+        if not ax=='none':
+            fgv.flip_file('DWI_CORRECTED.nhdr','DWI_CORRECTED.nhdr', axis=ax)
+            fgv.flip_file('newdirs.dat','newdirs.dat', axis=ax)
 
         os.chdir('..')
 
@@ -217,7 +218,7 @@ if __name__ == '__main__':
     parser.add_option("-m", "--fsl", action="store_true", dest="is_fsl", help="Perform motion correction involving only FSL")
     parser.add_option("-t", "--ants", action="store_true", dest="is_ants", help="Perform motion correction using ANTs")
     parser.add_option("-v", "--veconly", action="store_true", dest="is_veconly", help="Assumes registrations has already been done. Perform vector calculation only")
-    parser.add_option("-i", "--invert_vecs", dest="invert_vecs", default='1', help="Invert the final gradient vectors along an axis, comma-separated, i.e 0,1,2 for x,y,z; default is 1 for Y axis.")
+    parser.add_option("-i", "--invert_vecs", dest="invert_vecs", default='1', help="Invert the final gradient vectors along an axis, comma-separated, i.e 0,1,2 for x,y,z; default is 1 for Y axis. To turn off use 'none'")
     parser.add_option("-r", "--nrrd", action="store_true", dest="is_nrrd", help="Perform tend eddy current only")
 
     parser.add_option("-a", "--all", action="store_true", dest="is_all", help="Perform all correction steps")

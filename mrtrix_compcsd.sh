@@ -50,12 +50,12 @@ rm mask.mif
 bet2 $DWI dwibet -m -n -f 0.1
 mrconvert dwibet_mask.nii.gz mask.mif -datatype Bit
 
-# rm dt.mif
-# dwi2tensor $DWI dt.mif -grad $GRAD
+rm dt.mif
+dwi2tensor $DWI dt.mif -grad $GRAD
 # rm fa.mif
 # tensor2FA dt.mif - | mrmult - mask.mif fa.mif
-# rm ev.mif
-# tensor2vector dt.mif - | mrmult - fa.mif ev.mif
+#rm ev.mif
+#tensor2vector dt.mif - | mrmult - fa.mif ev.mif
 # rm sf.mif
 # erode mask.mif -npass 3 - | mrmult fa.mif - - | threshold - -abs 0.7 sf.mif
 # rm response.txt
