@@ -18,7 +18,7 @@ endif
 # use ijk native space instead, apply transform manually!
 
 echo "tend2 fiber -i $1 -dwi -wspos -ns seeds/IC"$seed".txt -o "$fiberFile" -ap \
- -t 2evec0 -stop aniso:cl2,$3 frac:$4 radius:$5 minlen:$6 -n rk4 \
+ -t 2evec0 -stop aniso:cl1,$3 frac:$4 radius:$5 minlen:$6 -n rk4 \
  -k cubic:0.0,0.5 \
  -v 2 -step $7 "
  

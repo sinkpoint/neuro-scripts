@@ -19,15 +19,18 @@ args=("$@")
 
 GRAD=""
 DWI=""
-
+MASK=""
 OPTIND=0
 
-while getopts "g:" OPTION
+while getopts "g:m:" OPTION
 do
 	echo "opt $OPTION arg $OPTARG ind $OPTIND"
 	case $OPTION in
 		g)
 			GRAD=$OPTARG
+			;;
+		m)
+			MASK=$OPTARG
 			;;
 		?)
 			usage
@@ -45,13 +48,23 @@ else
 fi
 
 rm mask.mif
+DWI_NIFTI="Motion_Corrected_DWI_nobet.nii.gz"
+if [ -z "$MASK" ]; then
+	if [ -e $DWI_NIFTI ]; then
+		bet2 $DWI_NIFTI dwibet -m -n -f 0.1	
+		mrconvert dwibet_mask.nii.gz mask.mif -datatype Bit
+	else
+		dwi2mask -g $GRAD $DWI mask.mif
+	fi
+else
+	mrconvert $MASK mask.mif -datatype Bit
+fi
 #average $DWI -axis 3 - | threshold -percent 5 - - | median3D - - | median3D - mask.mif0
-#dwi2mask -g $GRAD $DWI mask.mif
-bet2 $DWI dwibet -m -n -f 0.1
-mrconvert dwibet_mask.nii.gz mask.mif -datatype Bit
+#bet2 $DWI dwibet -m -n -f 0.1
 
 rm dt.mif
 dwi2tensor $DWI dt.mif -grad $GRAD
+tensor2metric -vector ev.mif dt.mif
 # rm fa.mif
 # tensor2FA dt.mif - | mrmult - mask.mif fa.mif
 #rm ev.mif

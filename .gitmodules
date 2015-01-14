@@ -1,0 +1,3 @@
+[submodule "pynrrd"]
+	path = pynrrd
+	url = https://github.com/sinkpoint/pynrrd.git

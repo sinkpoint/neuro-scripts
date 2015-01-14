@@ -165,9 +165,10 @@ def reconall(targetmap, maxinst=8):
 			else:
 				racmd = 'recon-all ' + stages + ' ' + ' -s ' + keys[instnum] + ' ' + options.cmd
 
-			cmd = 'gnome-terminal --title='+keys[instnum]+' -x tcsh -c "' + racmd + '; sleep infinity" &'
+			cmd = 'screen -dmLS '+keys[instnum]+' bash -i -c "' + racmd + '"'
 			print cmd
 			subprocess.Popen(shlex.split(cmd))
+			#os.system(cmd)
 			instnum = instnum + 1
 		time.sleep(sleeptime)
 		i = i + 1

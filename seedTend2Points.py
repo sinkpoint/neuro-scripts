@@ -13,18 +13,16 @@ import sys
 from nrrd import NrrdReader
 from StringIO import StringIO
 
-options = []
-args = []
+def run(options, args):
+    seed_xst(options.input, name=options.name, spacing=options.spacing, num_points=options.num_points, is_rand=options.isRand)
 
-def run():
-    global options,args
-
+def seed_xst(filename, name='IC', spacing=0.3, is_rand=True, num_points=10):
     nrrdr = NrrdReader()
 
-    params, bindata = nrrdr.getFileContent(options.input)
-    for k in params.keys():
-        print k,' : ',params[k]
-
+    params, bindata = nrrdr.load(filename, get_raw=True)
+    # for k in params.keys():
+    #     print k,' : ',params[k]
+    params = params._data
     dim = params['sizes']
     dimX = dim[0]
     dimY = dim[1]
@@ -33,13 +31,12 @@ def run():
     numSeeds = 9
     seedThresh = numSeeds * 30
     radius = 0.5
-    spacing = options.spacing
 
-    if params['type'][0] == 'float':
+    if params['type'] == 'float':
         datatype = numpy.float32
-    elif params['type'][0] == 'double':
+    elif params['type'] == 'double':
         datatype = numpy.double 
-    elif params['type'][0] == 'short':
+    elif params['type'] == 'short':
         datatype = numpy.short
 
     size = dimX*dimY*dimZ
@@ -77,7 +74,7 @@ def run():
                 val = data[x][y][z]
                 if val > 0:
                     if not filemap.has_key(val):
-                        filename = 'IC%d.txt' % val
+                        filename = name+'%d.txt' % val
                         filemap[val] = open(filename, 'w')
 
                     print '(%d,%d,%d) \t %d' % (x,y,z,data[x][y][z])
@@ -85,8 +82,8 @@ def run():
                     vy = y
                     vz = z
 
-                    if options.isRand:
-                        points = numpy.random.uniform(size=[options.num_points, 3]) + [vx-0.5, vy-0.5, vz-0.5]
+                    if is_rand:
+                        points = numpy.random.uniform(size=[num_points, 3]) + [vx-0.5, vy-0.5, vz-0.5]
                         for p in points:
                             str = '%f %f %f\n' % (p[0],p[1],p[2])
                             filemap[val].write(str)
@@ -119,6 +116,7 @@ if __name__ == '__main__':
     parser.add_option("-s", "--spacing", dest="spacing", type="float", help="Seed spacing", default="0.3")
     parser.add_option("-r", "--random", action="store_true", dest="isRand")
     parser.add_option("-n", "--num_points", dest="num_points", type="int", default="10")
+    parser.add_option("-m", "--name", dest="name", default="IC")
     #parser.add_option("-o", "--output", dest="output", help="output file name")
     (options, args) =  parser.parse_args()
 
@@ -126,4 +124,4 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(2)
     else:
-        run()
+        run(options, args)

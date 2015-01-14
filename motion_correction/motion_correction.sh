@@ -61,38 +61,42 @@ fi
 echo "Motion Correction Start"
 echo "Correcting Scan: $scan"
 
-if ! $MOTION_COR_ONLY; then
-	echo "Split scans"
-	# Split the volume into components
-	fslsplit $scan.nii.gz
+echo "Split scans"
+# Split the volume into components
+fslsplit $scan.nii.gz
 
-	echo "Register to baseline"
-	# Loop and bet all with f=0.1
-	for vol in vol*nii.gz
-	do
-	#	gunzip $vol
-		volume=$(basename $vol .nii.gz)
-		volname=$( basename $volume .nii);
-		#echo "Betting: $volume"
-		#bet "$vol" "$volname"_bet -R -f 0.1
-	#	gunzip "$volname"_bet.nii.gz
+echo "Register to baseline"
+# Loop and bet all with f=0.1
+for vol in vol*nii.gz
+do
+#	gunzip $vol
+	volume=$(basename $vol .nii.gz)
+	volname=$( basename $volume .nii);
+	#echo "Betting: $volume"
+	#bet "$vol" "$volname"_bet -R -f 0.1
+#	gunzip "$volname"_bet.nii.gz
 
 
-		echo "Registering: $volname"
-		# Generate linear transform from B-ZERO to T2
+	echo "Registering: $volname"
+	# Generate linear transform from B-ZERO to T2
 #		flirt -in ""$volname"_bet.nii.gz" -ref vol0000_bet.nii.gz -nosearch -omat "$volname"_trans.xfm -noresample -noresampblur -interp spline -out "$volname"_reg.nii.gz -paddingsize 1
-		flirt -in ""$volname".nii.gz" -ref vol0000.nii.gz -nosearch -noresampblur -omat "$volname"_trans"$affix".xfm -interp spline -out "$volname"_reg"$affix".nii.gz -paddingsize 1	
-		#echo "Apply transform: $volname"	
-		#resample on the original
-		#flirt -interp spline -in "$volname" -ref vol0000.nii.gz -out "$volname"_reg.nii.gz -applyxfm -init  "$volname"_trans.xfm -paddingsize 1
-	done
-	
-	echo "fslmerge"
+	if ! $MOTION_COR_ONLY; then
+		flirt -in ""$volname".nii.gz" -ref vol0000.nii.gz -nosearch -noresampblur -omat "$volname"_trans"$affix".xfm -interp spline -out "$volname"_reg"$affix".nii.gz -paddingsize 1
+	else
+		echo "Apply transform: $volname"					
+		flirt -interp spline -in "$volname" -ref vol0000.nii.gz -out "$volname"_reg"$affix".nii.gz -applyxfm -init  "$volname"_trans"$affix".xfm -paddingsize 1
+	fi
+	#echo "Apply transform: $volname"	
+	#resample on the original
+	#flirt -interp spline -in "$volname" -ref vol0000.nii.gz -out "$volname"_reg.nii.gz -applyxfm -init  "$volname"_trans.xfm -paddingsize 1
+done
 
-	fslmerge -t "$mcored_file".nii.gz *reg"$affix".nii.gz
+echo "fslmerge"
 
-	rm vol*nii*	
-fi
+fslmerge -t "$mcored_file".nii.gz *reg"$affix".nii.gz
+
+rm vol*nii*	
+
 
 echo "Calculating transforms"
 
