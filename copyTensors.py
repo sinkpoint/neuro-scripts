@@ -67,21 +67,28 @@ def run():
     idx = []
 
     points_len = len(points)
+    print '# %d POINTS' % points_len
     i = 0   
     for i,p in enumerate(points):
-        sys.stdout.write('# calculate ijk indices %d/%d \r' % (i, points_len))
+        #sys.stdout.write('# calculate ijk indices %d/%d \r' % (i, points_len))
 
         index = getVolumeIndex(p, origin, vspace_inv, dirs)
-        idx.append(index)
-        tensormat = tensors[index[2],index[1],index[1]]
+        #print index
+        #tensormat = tensors[:,index[0],index[1],index[2]]
         #tensormat = numpy.array(tensors[index[2]][index[1]][index[0]])
+        tensormat = tensors[index[2],index[1],index[0]]
 
-        if is_tensor:
-            tensormat = tensormat.reshape([3,3])
+        # if is_tensor:
+        #     tensormat = tensormat.reshape([3,3])
+        if numpy.average(tensormat) == 0:
+            print index,' is zero\n'
+
         #print tensormat        
         #tensormat = tensormat * vspacemat
-        pointTensors.append(list(numpy.ravel(tensormat)))
-    sys.stdout.write('\n')
+        pointTensors.append(tensormat)
+        idx.append(index)
+    #sys.stdout.write('\n')
+    print '# %d TENSORS ' % len(pointTensors)
     writeFiber(pointTensors, header)
     idx = numpy.array(idx)
     print '# min corner= ',numpy.amin(idx,axis=0)
@@ -111,7 +118,9 @@ def writeFiber(pointTensors, header):
 #            for j in i:
 #                print j,
         if is_tensor:
-            outfile.write('%f %f %f %f %f %f %f %f %f\n' % (i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8]))
+            for k in i:
+                outfile.write('%.10e ' % k)
+            outfile.write('\n')
         else:
             outfile.write('%f\n' % (i[0]))
 
@@ -156,15 +165,20 @@ def openFiberFile():
     lcount = 0
     while file:
         line = file.readline()
-        fiberfile.append(line)
         if len(line) == 0:
             break
+        if line.startswith('POINT_DATA'):
+            break            
+        fiberfile.append(line)            
+
+        
         line = line.strip()
         if line.startswith('POINTS'):
             vals = line.split(' ')
             numpoints = int(vals[1])
             readpoint = True
             lcount = 0
+
         elif readpoint:
             if lcount < numpoints:
                 vals = line.split(' ')
@@ -174,6 +188,7 @@ def openFiberFile():
                 lcount+=1
             else:
                 readpoint = False
+        
     file.close()
     return points
 
@@ -181,6 +196,7 @@ def openFiberFile():
 
 
 def openTensorData():
+    global options
     header, bindata = openTensorFile()
     params = header._data
     for k in params.keys():
@@ -188,18 +204,26 @@ def openTensorData():
         print params[k]
 
     if bindata is None:
-        FILE = params['data file'][0]
-        print FILE
-    encoding = params['encoding'][0]
+        FILE = params['data file']
+        print '>',FILE
+        from os import path
+        basedir = path.dirname(path.realpath(options.tensor))
+        FILE = path.join(basedir, FILE)
+    encoding = params['encoding']
     sizes = params['sizes']
+    # s1 = sizes[0]
+    # sizes = sizes[1:]
+    # sizes.append(s1)
     sizes.reverse()
 
-    data = numpy.array([])
+
+    #data = numpy.array([])
     # cast volume into datatype
     datatype = numpy.float32
-
+    data = None
 
     if encoding == 'gzip':
+        print 'gzipped'
         if bindata is None:
             f = gzip.open(FILE, 'r')
             bindata = f.read()
