@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import nibabel as nib
 from optparse import OptionParser
-from dipy.align.aniso2iso import resample
+from dipy.align.reslice import reslice
 import sys
 
 def makeIso(filename, outname, voxel_size=1.):
@@ -13,14 +13,14 @@ def makeIso(filename, outname, voxel_size=1.):
     # reslice image into 1x1x1 iso voxel
 
     new_zooms = (voxel_size, voxel_size, voxel_size)
-    data, affine = resample(data, affine, zooms, new_zooms)
-    img = nib.Nifti1Image(data, affine)
+    data2, affine2 = reslice(data, affine, zooms, new_zooms)
+    img = nib.Nifti1Image(data2, affine2)
 
-    print data.shape
+    print data2.shape
     print img.get_header().get_zooms()
     print "###"
 
-    nib.save(img, outname)    
+    nib.save(img, outname)
 
 if __name__ == '__main__':
     parser = OptionParser(usage="Usage: %prog input output")
