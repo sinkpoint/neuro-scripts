@@ -1,11 +1,15 @@
 #!/bin/tcsh -ef
 if ($# < 1) then
-	echo "arg order: dwi label# fa frac radius minlen step_size tensor_file seed_file"  
+	echo "arg order: dwi label# fa frac radius minlen step_size tensor_file seed_file <density>"  
 	exit 1
 endif
 
 if( $# == 9) then
 	seedTend2Points.py -i $9 -r -n 20
+endif
+
+if( $# == 10) then
+    seedTend2Points.py -i $9 -r -n $10
 endif
 
 set seed="$2"
@@ -27,6 +31,7 @@ tend2 fiber -i $1 -dwi -wspo -ns seeds/IC"$seed".txt -o "$fiberFile" -ap \
  -k cubic:0.0,0.5 \
  -v 2 -step $7 
  
-echo "copy Tensors"
+echo "copy Scalars"
 copyTensors.py -t "$8" -f "$fiberFile" -o "$fiberFile"
+#copyScalarsToVtk.py -i "$fiberFile" -m "$8" -o "$fiberFile"
 

@@ -34,14 +34,9 @@ do
 		o)
 			out_file=$OPTARG
 			;;
-		?)
-			usage
-			exit
-			;;
 	esac
 done
 
-if [ -n $in_file ]; then
-	echo "DO Conversion"
-	$cli/ResampleScalarVolume $in_file $out_file
-fi
+
+	$cli/ResampleScalarVolume $@
+

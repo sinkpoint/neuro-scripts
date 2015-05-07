@@ -102,7 +102,8 @@ echo "Calculating transforms"
 
 bash $MOTION_HOME/transpose.sh $scan.bvec > dirs_62.dat
 cat *trans*.xfm > Transforms.txt
-matlab -nojvm < $MOTION_HOME/finitestrain.m
+#matlab -nojvm < $MOTION_HOME/finitestrain.m
+finitestrain.py -t Transforms.txt -i dirs_62.dat -o newdirs.dat
 perl $MOTION_HOME/dattonrrd.pl newdirs.dat newdirs.nhdr
 
 echo "Convert to nrrd"

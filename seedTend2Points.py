@@ -32,6 +32,8 @@ def seed_xst(filename, name='IC', spacing=0.3, is_rand=True, num_points=10):
     seedThresh = numSeeds * 30
     radius = 0.5
 
+    datatype = numpy.uint8
+    print params['type']
     if params['type'] == 'float':
         datatype = numpy.float32
     elif params['type'] == 'double':
