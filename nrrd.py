@@ -1,1 +1,0 @@
-pynrrd/nrrd.py

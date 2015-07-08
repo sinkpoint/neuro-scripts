@@ -45,7 +45,7 @@ def seed_xst(filename, name='IC', spacing=0.3, is_rand=True, num_points=10):
     shape = (dimX, dimY, dimZ)
 
     if 'data file' in params:
-        filename = params['data file'][0]
+        filename = params['data file']
         f = gzip.open(filename, 'r')
         FILE = f.read()
         f.close()

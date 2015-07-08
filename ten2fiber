@@ -5,6 +5,7 @@ if ($# < 1) then
 endif
 
 if( $# == 9) then
+    echo "seedTend2Points.py -i $9 -r -n 20"
 	seedTend2Points.py -i $9 -r -n 20
 endif
 
