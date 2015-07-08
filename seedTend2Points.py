@@ -10,7 +10,7 @@ import gzip
 import numpy
 import os
 import sys
-from nrrd import NrrdReader
+from pynrrd import NrrdReader
 from StringIO import StringIO
 
 def run(options, args):

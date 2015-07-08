@@ -7,7 +7,7 @@
 
 from optparse import OptionParser
 import numpy, math
-import nrrd
+import pynrrd as nrrd
 import sys
 import os
 import time
@@ -243,7 +243,7 @@ def openTensorData():
 def openTensorFile():
     global options
     reader = nrrd.NrrdReader()
-    header, data = reader.getFileAsHeader(options.tensor)
+    header, data = reader.load(options.tensor)
     return header, data
 
 

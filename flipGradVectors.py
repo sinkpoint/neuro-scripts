@@ -8,7 +8,7 @@ from optparse import OptionParser
 import os
 import sys
 import numpy as np
-import nrrd
+import pynrrd as nrrd
 
 def run(options, args):
 	infile = args[0]
@@ -20,7 +20,7 @@ def flip_file(infile, outfile, axis='1', dryrun=False):
 	ax = [ int(i) for i in axis.split(',') ]	
 
 	if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
-		header, data = nrrd.NrrdReader().getFileAsHeader(infile)
+		header, data = nrrd.NrrdReader().load(infile)
 		dvecs = header._data['DWMRI_gradient']
 	else:
 		dvecs = np.loadtxt(infile)
