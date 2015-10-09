@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import nibabel as nib
 from optparse import OptionParser
 from dipy.align.reslice import reslice

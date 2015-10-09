@@ -5,7 +5,7 @@ Created on Fri Aug 16 15:36:45 2013
 @author: dchen
 """
 
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 from optparse import OptionParser
 

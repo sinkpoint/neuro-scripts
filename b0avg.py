@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 from glob import glob
 from optparse import OptionParser
 import os

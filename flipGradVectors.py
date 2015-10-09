@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Author: David Qixiang Chen
 # email: qixiang.chen@gmail.com
 #

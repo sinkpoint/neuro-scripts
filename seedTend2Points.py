@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Author: David Qixiang Chen
 # email: qixiang.chen@gmail.com
@@ -114,7 +114,6 @@ def seed_xst(filename, name='IC', spacing=0.3, is_rand=True, num_points=10):
 if __name__ == '__main__':
     parser = OptionParser(usage="Usage: %prog -i input")
     parser.add_option("-i", "--input", dest="input",help="Input file name")
-    parser.add_option("-d", "--dim", dest="dim",help="Volume dimension", default="256,256,44")
     parser.add_option("-s", "--spacing", dest="spacing", type="float", help="Seed spacing", default="0.3")
     parser.add_option("-r", "--random", action="store_true", dest="isRand")
     parser.add_option("-n", "--num_points", dest="num_points", type="int", default="10")
