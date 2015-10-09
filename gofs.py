@@ -7,6 +7,7 @@
 
 import sys, os, re, subprocess, time, shlex
 from optparse import OptionParser
+from os import path
 
 options = []
 args = []
@@ -61,10 +62,9 @@ def gofs():
 
         if ( origdir ):
             from glob import glob
-            from os import path
             orig_mgzs = glob(origdir+'/*.mgz')
             for i in orig_mgzs:
-                origs_map[i] = 'mgz'
+                origs_map[path.basename(i)] = 'mgz'
 
             origs = listFolders(origdir)
             for i in origs:
@@ -74,22 +74,26 @@ def gofs():
             dones = list(set(orig_keys).intersection(set(procs)))
             fresh = list(set(orig_keys).difference(set(procs)))
             
-            print "Processed scans found:"
-            printNames(dones)       
-        
-            print "All available scans with originals found:"
+            print "= All available scans with originals found:"
             print '-- Freesurfer .mgz files: '
             for i in orig_mgzs:
                 print path.basename(i)
             print '-- Folders '
             printNames(origs)
             print ""
+
+            print "= Processed scans found:"
+            printNames(dones)  
+
+            print '= Unprocessed:'     
+            printNames(fresh)
+        
         
             print "\nWhich group do you want to process? (a)ll/(p)rocessed/(u)nprocessed) >",
             ans = getAns(('a', 'p', 'u'))
         
             subjs = {
-                'a': origs,
+                'a': origs_map.keys(),
                 'p': dones,
                 'u': fresh,
             }.get(ans)
@@ -128,7 +132,10 @@ def gofs():
                         targetmap[i] = raw_input()
             else :
                 for i in subjs:
-                    targetmap[i] = "*"+options.extpad
+                    if origs_map[i] == 'dir':
+                        targetmap[i] = "*"+options.extpad
+                    else:
+                        targetmap[i] = None
 
         for k,v in targetmap.iteritems():
             print k,v
@@ -180,15 +187,21 @@ def reconall(targetmap, maxinst=8):
         jobnum = int(jobnum)
         print 'number of jobs: %d' % jobnum
 
+        key_label = keys[instnum]
+        name = path.basename(keys[instnum])
+
         if jobnum < options.max:
-            print "====================| NOW PROCESSING <" + targetmap[keys[instnum]] + " (%d/%d) > |>=====================" % (instnum + 1, subjnum)
+            print "====================| NOW PROCESSING <" + name + " (%d/%d) > |>=====================" % (instnum + 1, subjnum)
 
             if (options.stage == 'a' or options.stage == '1') and options.mstage == None:
-                racmd = 'recon-all -i $SUBJECTS_DIR/' + options.orig + '/' + keys[instnum] + '/' + targetmap[keys[instnum]] + ' ' + stages + ' ' + ' -s ' + keys[instnum] + ' ' + options.cmd
+                input_path = '$SUBJECTS_DIR/' + options.orig + '/' + name
+                if targetmap[key_label]:
+                     input_path += '/' + targetmap[key_label]
+                racmd = 'recon-all -i '+ input_path + ' ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
             else:
-                racmd = 'recon-all ' + stages + ' ' + ' -s ' + keys[instnum] + ' ' + options.cmd
+                racmd = 'recon-all ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
 
-            cmd = 'screen -dmLS '+keys[instnum]+' bash -i -c "' + racmd + '"'
+            cmd = 'screen -dmLS '+name+' bash -i -c "' + racmd + '"'
             print cmd
             subprocess.Popen(shlex.split(cmd))
             #os.system(cmd)
@@ -204,7 +217,7 @@ def reconall(targetmap, maxinst=8):
 
 def printNames(inp):
     for i in inp:
-        print i,
+        print path.basename(i),
     print ""
 
 def getAns(rep=['y', 'n']):
@@ -223,7 +236,7 @@ if __name__ == '__main__':
     parser = OptionParser(usage="Usage: %prog [options] fsSubjectsDir")
     parser.add_option("-s", "--stage", dest="stage", default='a', help="Stage of recon-all to run. \nOptions: 'a' '1' '2' '3' '4'. default is 'a'. \nAny mixture of 1234 will start these steps in combination.")
     parser.add_option("-j", "--subjects", dest="subj", help="Manually define a list of subjects to run")
-    parser.add_option("-z", "--mgz", dest="is_mgz", action='store_true', default=False, help="Files in the _orig_ folder are in mgz format")    
+    parser.add_option("-z", "--mgz", dest="is_mgz", action='store_true', default=False, help="Files in the _orig_ folder are in mgz format")
     parser.add_option("-m", "--manualStage", dest="mstage", help="Manually define the recon stages as recon-all parameters")
     parser.add_option("-o", "--orig", dest="orig", default='_orig_', help="folder name of original scans, default is '_orig_'")
     parser.add_option("-c", "--cmd", dest="cmd", default='', help="Additional options to add to recon-all manually")
