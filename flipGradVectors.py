@@ -22,6 +22,7 @@ def flip_file(infile, outfile, axis='1', dryrun=False):
 	if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
 		header, data = nrrd.NrrdReader().load(infile)
 		dvecs = header._data['DWMRI_gradient']
+		dvecs = np.asarray(dvecs)
 	else:
 		dvecs = np.loadtxt(infile)
 
