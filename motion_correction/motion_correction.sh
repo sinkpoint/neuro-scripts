@@ -20,10 +20,11 @@ EOF
 
 MOTION_HOME=${HLAB_SCRIPT_PATH}/motion_correction
 
+COR_NAME="DWI_CORRECTED"
 args=("$@")
 affix="_nobet"
-dwi_out="DWI_CORRECTED.nhdr"
-mcored_file="Motion_Corrected_DWI"$affix""
+dwi_out="${COR_NAME}.nhdr"
+mcored_file="${COR_NAME}${affix}"
 
 MOTION_COR_ONLY=false
 
@@ -65,6 +66,7 @@ echo "Split scans"
 # Split the volume into components
 fslsplit $scan.nii.gz
 
+rm vol*${affix}*nii*
 echo "Register to baseline"
 # Loop and bet all with f=0.1
 for vol in vol*nii.gz
@@ -100,10 +102,12 @@ rm vol*nii*
 
 echo "Calculating transforms"
 
-bash $MOTION_HOME/transpose.sh $scan.bvec > dirs_62.dat
+COR_VECS="${COR_NAME}.bvec"
+
+bash $MOTION_HOME/transpose.sh $scan.bvec > $COR_VECS
 cat *trans*.xfm > Transforms.txt
 #matlab -nojvm < $MOTION_HOME/finitestrain.m
-finitestrain.py -t Transforms.txt -i dirs_62.dat -o newdirs.dat
+finitestrain.py -t Transforms.txt -i $COR_VECS -o newdirs.dat
 perl $MOTION_HOME/dattonrrd.pl newdirs.dat newdirs.nhdr
 
 echo "Convert to nrrd"

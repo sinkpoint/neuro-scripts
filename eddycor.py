@@ -8,15 +8,17 @@ class Eddycor:
     def __init__(self, options, args):
         self.options = options
         self.args = args
-        self.subjName = ''
+        self.subjName = options.name
         self.subjDir = ''
         self.eddycorFileName =''
         self.force = False
 
     def goCor(self):
-        os.chdir(args[0])
+        if len(args) > 0:
+            os.chdir(args[0])
         self.subjDir = os.getcwd()
-        self.subjName = os.path.basename(os.getcwd())
+        if not self.subjName:
+            self.subjName = os.path.basename(os.getcwd())
         self.force = self.options.force
 
         if not options.dir:
@@ -227,10 +229,7 @@ if __name__ == '__main__':
     parser.add_option("-z", "--dicom_filter", dest="dicom_filter", default='*.dcm', help="String used to search for dicoms to convert, default=*.dcm")
     (options, args) = parser.parse_args()
 
-    if len(args) != 1 and not options.dir:
-        parser.print_help()
-        sys.exit(2)
-    else:
-        prog = Eddycor(options, args)
-        prog.goCor()
+
+    prog = Eddycor(options, args)
+    prog.goCor()
 

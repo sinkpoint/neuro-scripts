@@ -3,7 +3,6 @@
 # email: qixiang.chen@gmail.com
 #
 # Flip signs of a particular gradient vector dimension
-
 from optparse import OptionParser
 import os
 import sys
@@ -11,40 +10,43 @@ import numpy as np
 import pynrrd as nrrd
 
 def run(options, args):
-	infile = args[0]
-	outfile = args[1]
+    infile = args[0]
+    outfile = args[1]
 
-	flip_file(infile, outfile, axis=options.axis, dryrun=options.dryrun)
+    flip_file(infile, outfile, axis=options.axis, dryrun=options.dryrun)
 
 def flip_file(infile, outfile, axis='1', dryrun=False):
-	ax = [ int(i) for i in axis.split(',') ]	
+    ax = [ int(i) for i in axis.split(',') ]    
 
-	if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
-		header, data = nrrd.NrrdReader().load(infile)
-		dvecs = header._data['DWMRI_gradient']
-	else:
-		dvecs = np.loadtxt(infile)
+    if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
+        header, data = nrrd.NrrdReader().load(infile)
+        dvecs = np.array(header.getDwiGradients())
+    else:
+        dvecs = np.loadtxt(infile)
 
-	print '=========== Before ============='
-	print dvecs[:20]
+    print '=========== Before ============='
+    for i in dvecs[:20]:
+        print i
 
-	dvecs = flip_vecs(dvecs, ax)
-	print '=========== After ============='	
-	print dvecs[:20]
+    dvecs = flip_vecs(dvecs, ax)
 
-	if not dryrun:
-		if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
-			header._data['DWMRI_gradient'] = dvecs
-			nrrd.NrrdWriter().write(header, outfile)
-		else:
-			np.savetxt(outfile, dvecs, fmt='%10.6f')
+    print '=========== After =============' 
+    for i in dvecs[:20]:
+        print i
+
+    if not dryrun:
+        if infile.endswith('.nrrd') or infile.endswith('.nhdr'):
+            header.setDwiGradients(dvecs)
+            nrrd.NrrdWriter().write(header, outfile)
+        else:
+            np.savetxt(outfile, dvecs, fmt='%10.6f')
 
 
 def flip_vecs(dvecs, idims):
-	for i in idims:
-		dvecs[:,i] *= -1
+    for i in idims:
+        dvecs[:,i] *= -1
 
-	return dvecs
+    return dvecs
 
 
 if __name__ == '__main__':
