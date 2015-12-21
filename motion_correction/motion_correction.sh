@@ -103,7 +103,7 @@ rm vol*nii*
 echo "Calculating transforms"
 
 COR_VECS="${COR_NAME}.bvec"
-
+cp "${scan}.bval" "${COR_NAME}.bvec"
 bash $MOTION_HOME/transpose.sh $scan.bvec > $COR_VECS
 cat *trans*.xfm > Transforms.txt
 #matlab -nojvm < $MOTION_HOME/finitestrain.m
