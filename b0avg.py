@@ -60,7 +60,7 @@ class B0avg:
         
         
         count = 0
-        for n,i in enumerate(iparams[NrrdReader.grdkey]):
+        for n,i in enumerate(iparams[NrrdReader.grdkey][0]):
             if count > 0 and n <= b0n:
                 continue
 

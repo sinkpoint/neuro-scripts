@@ -4,7 +4,7 @@ import nibabel as nib
 import vtk
 import argparse
 from multiprocessing import Pool
-
+from vtkFileIO import vtkToStreamlines
 _DEBUG = 0
 
 
@@ -19,7 +19,7 @@ def run(args):
 
     outbasename = args.out.split('.')[0]
 
-    streamlines = vtkToStreamlines(args.in_fiber)
+    streamlines, polydata = vtkToStreamlines(args.in_fiber)
     points = np.concatenate(streamlines)
 
     #points = np.array([[100,100,20,1],[101,101,21,1]])
@@ -42,7 +42,7 @@ def run(args):
     b = np.ascontiguousarray(pt_ijk).view(np.dtype((np.void, pt_ijk.dtype.itemsize * pt_ijk.shape[1])))
     pt_ijk = np.unique(b).view(pt_ijk.dtype).reshape(-1, pt_ijk.shape[1])
     pt_ijk3 = pt_ijk[:,:3]
-    print pt_ijk3
+    #print pt_ijk3
 
 
     outBinData[pt_ijk3[:,0],pt_ijk3[:,1],pt_ijk3[:,2]] = 1
@@ -71,18 +71,18 @@ def myrange(i,j):
     else:
         return range(i,j)
 
-def vtkToStreamlines(filename):
-    vreader = vtk.vtkPolyDataReader()
-    vreader.SetFileName(filename)
-    vreader.Update()
-    inputPolyData = vreader.GetOutput()
+# def vtkToStreamlines(filename):
+#     vreader = vtk.vtkPolyDataReader()
+#     vreader.SetFileName(filename)
+#     vreader.Update()
+#     inputPolyData = vreader.GetOutput()
 
-    streamlines = []
-    for i in range(inputPolyData.GetNumberOfCells()):
-        pts = inputPolyData.GetCell(i).GetPoints()
-        npts = np.array([pts.GetPoint(i) for i in range(pts.GetNumberOfPoints())])
-        streamlines.append(npts)
-    return streamlines
+#     streamlines = []
+#     for i in range(inputPolyData.GetNumberOfCells()):
+#         pts = inputPolyData.GetCell(i).GetPoints()
+#         npts = np.array([pts.GetPoint(i) for i in range(pts.GetNumberOfPoints())])
+#         streamlines.append(npts)
+#     return streamlines
 
 def bounding_box(nparray):
     """
@@ -117,7 +117,7 @@ def getIjkDensity(streamlines, ref_image, index):
 
     vox_density, num_fiber = getDensityOfBounds(streamlines, minCorner, maxCorner)
 
-    print index, vox_density, num_fiber
+    #print index, vox_density, num_fiber
     return vox_density, num_fiber
 
 

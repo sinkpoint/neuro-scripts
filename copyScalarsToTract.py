@@ -12,10 +12,10 @@ def trilinear_interpolator_speedup( img, indices):
 
     """    
 
-    vdim = img.get_zooms()
-    dx = vdim[0]
-    dy = vdim[1]
-    dz = vdim[2]
+    # vdim = img.header.get_zooms()
+    dx = 1
+    dy = 1
+    dz = 1
 
     input_array = np.array(img.get_data())
     indices = np.array(indices)
@@ -96,38 +96,40 @@ def copyScalarsToVtk(nifti_img, vtk_file, output_file, scalar_name='Scalar'):
     import vtk
 
     streams, vtkdata = vtkToStreamlines(vtk_file)
-    points = np.concatenate(streams)
-    print 'world'
-    max = np.amax(points, axis=0)
-    print max
-    min = np.amin(points, axis=0)
-    print min
+    if len(streams) > 0:
+        points = np.concatenate(streams)
+        print 'world'
+        max = np.amax(points, axis=0)
+        print max
+        min = np.amin(points, axis=0)
+        print min
 
 
-    points = np.hstack((points,np.ones((points.shape[0],1))))
-    #coords = np.hstack((coords,np.ones((coords.shape[0],1))))
+        points = np.hstack((points,np.ones((points.shape[0],1))))
+        #coords = np.hstack((coords,np.ones((coords.shape[0],1))))
 
-    #coords_world = coords * affine
-    points_ijk = aff_inv * points.T
-    points_ijk = points_ijk.T[:,:3]
+        #coords_world = coords * affine
+        points_ijk = aff_inv * points.T
+        points_ijk = points_ijk.T[:,:3]
 
-    print 'ijk'
-    max = np.amax(points_ijk, axis=0)
-    print max
-    min = np.amin(points_ijk, axis=0)
-    print min
+        print 'ijk'
+        max = np.amax(points_ijk, axis=0)
+        print max
+        min = np.amin(points_ijk, axis=0)
+        print min
 
-    import time
-    s = time.time()
-    scalars = trilinear_interpolator_speedup(img, points_ijk)
+        import time
+        s = time.time()
+        scalars = trilinear_interpolator_speedup(img, points_ijk)
 
-    vtkScalars = vtk.vtkFloatArray()
-    vtkScalars.SetName(scalar_name)
-    vtkScalars.SetNumberOfComponents(1)
-    #vtkScalars.SetNumberOfTuples(len(scalars))
-    for i,v in enumerate(scalars):
-        vtkScalars.InsertNextTuple1(v)
-    vtkdata.GetPointData().SetScalars(vtkScalars)
+        vtkScalars = vtk.vtkFloatArray()
+        vtkScalars.SetName(scalar_name)
+        vtkScalars.SetNumberOfComponents(1)
+        #vtkScalars.SetNumberOfTuples(len(scalars))
+        for i,v in enumerate(scalars):
+            vtkScalars.InsertNextTuple1(v)
+        vtkdata.GetPointData().AddArray(vtkScalars)
+        vtkdata.GetPointData().SetActiveScalars(scalar_name)
 
     writer = vtk.vtkXMLPolyDataWriter()
     #writer = vtk.vtkPolyDataWriter()

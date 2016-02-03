@@ -204,9 +204,9 @@ def reconall(targetmap, maxinst=8):
                     input_path += '/' + name
 
                 input_path += '/' + targetmap[key_label]['name']
-                racmd = 'recon-all -i '+ input_path + ' ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
+                racmd = 'recon-all -use-gpu -i '+ input_path + ' ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
             else:
-                racmd = 'recon-all ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
+                racmd = 'recon-all -use-gpu ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
 
             cmd = 'screen -dmLS '+name+' bash -i -c "' + racmd + '"'
             print cmd
