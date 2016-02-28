@@ -25,17 +25,17 @@ class Eddycor:
             search = self.options.search
             dirs = glob(search)
             print dirs
+            root = os.getcwd()
             for dti in dirs:
+                os.chdir(dti)
                 self.doCor(dti)
+                os.chdir(root)
         else:
             self.doCor(self.options.dir)
 
 
     def doCor(self, dir):
-
-        os.chdir(dir)
-        print os.getcwd()
-
+        print '===================== %s =======================' % dir
         PROCESSED_FILE = 'DWI_CORRECTED.nhdr'
 
         if self.options.skip:
@@ -89,7 +89,7 @@ class Eddycor:
         if not os.path.isdir("nrrd"):
             os.mkdir("nrrd")
 
-        rawNrrdFile = self.subjName + ".nhdr"
+        rawNrrdFile =  "DWI.nhdr"
         eddyCorFile = self.eddycorFileName + ".nhdr"
 
         if not os.path.isfile('nrrd/'+rawNrrdFile):
@@ -119,24 +119,24 @@ class Eddycor:
         os.chdir("nifti")
 
 
-        if not os.path.isfile(subjname+'.nii.gz'):
+        if not os.path.isfile('DWI.nii.gz'):
             print 'convert dicom to nifti'
             cmd = "dcm2nii -d N -e N -f Y -i N -p N -o . ../dicom/%s" % (self.options.dicom_filter)
             os.system(cmd)
 
 
-            nii_file = glob("*.nii.gz")[0]
+            nii_file = glob("*.bvec")[0]
             base = os.path.splitext(os.path.splitext(nii_file)[0])[0]
 
-            os.rename(base+".nii.gz", subjname+".nii.gz")
-            os.rename(base+".bvec", subjname+".bvec")
-            os.rename(base+".bval", subjname+".bval")
+            os.rename(base+".nii.gz", "DWI.nii.gz")
+            os.rename(base+".bvec", "DWI.bvec")
+            os.rename(base+".bval", "DWI.bval")
         os.chdir('..')
 
     def doFSLCorrection(self, dir, veconly=False):
         self.doNiftiPrepare(dir)
         os.chdir("nifti")
-        subjname = self.subjName
+        subjname = 'DWI'
 
 
             #cmd = "DWIConvert --inputDicomDirectory ../dicom --outputVolume %s.nii.gz --conversionMode DicomToFSL" % (subjname)
@@ -168,7 +168,7 @@ class Eddycor:
         os.chdir('nifti')
         #split scans
 
-        cmd='fslsplit %s.nii.gz' % (self.subjName)
+        cmd='fslsplit DWI.nii.gz'
         os.system(cmd)
 
         print '# Register to baseline with ANTs'

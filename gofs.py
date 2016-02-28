@@ -40,7 +40,7 @@ def gofs():
         subjs = options.subj.split(" ")
         print subjs
         for s in subjs:
-            targetmap[s] = s
+            targetmap[s] = {'name':s, 'type':'dir'}
     
     else:
         (subjdir, origdir) = init()
@@ -144,11 +144,10 @@ def gofs():
         for k,v in targetmap.iteritems():
             print k,v
 
-    if not options.test:
-        reconall(targetmap)
+    reconall(targetmap)
 
 
-def reconall(targetmap, maxinst=8):
+def reconall(targetmap):
     global options, args
 
 
@@ -170,9 +169,6 @@ def reconall(targetmap, maxinst=8):
                 stages += stagemap.get(i) + ' '
         if stages == '':
             stages = '-all -qcache'
-
-
-
 
     subjnum = len(targetmap)
     keys = targetmap.keys()
@@ -197,20 +193,21 @@ def reconall(targetmap, maxinst=8):
         if jobnum < options.max:
             print "====================| NOW PROCESSING <" + name + " (%d/%d) > |>=====================" % (instnum + 1, subjnum)
 
-            if (options.stage == 'a' or options.stage == '1') and options.mstage == None:
+            if not options.subj and (options.stage == 'a' or options.stage == '1') and options.mstage is None:
                 input_path = '$SUBJECTS_DIR/' + options.orig
                 tval = targetmap[key_label]
                 if tval['type']=='dir':
                     input_path += '/' + name
 
                 input_path += '/' + targetmap[key_label]['name']
-                racmd = 'recon-all -use-gpu -i '+ input_path + ' ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
+                racmd = 'recon-all -i '+ input_path + ' ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
             else:
-                racmd = 'recon-all -use-gpu ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
+                racmd = 'recon-all ' + stages + ' ' + ' -s ' + name + ' ' + options.cmd
 
             cmd = 'screen -dmLS '+name+' bash -i -c "' + racmd + '"'
             print cmd
-            subprocess.Popen(shlex.split(cmd))
+            if not options.test:
+                subprocess.Popen(shlex.split(cmd))
             #os.system(cmd)
             instnum = instnum + 1
         time.sleep(sleeptime)
@@ -246,8 +243,8 @@ if __name__ == '__main__':
     #parser.add_option("-z", "--mgz", dest="is_mgz", action='store_true', default=False, help="Files in the _orig_ folder are in mgz format")
     parser.add_option("-m", "--manualStage", dest="mstage", help="Manually define the recon stages as recon-all parameters")
     parser.add_option("-o", "--orig", dest="orig", default='_orig_', help="folder name of original scans, default is '_orig_'")
-    parser.add_option("-c", "--cmd", dest="cmd", default='', help="Additional options to add to recon-all manually")
-    parser.add_option("-x", "--max", dest="max", type='int', default=7, help="Maximum number of concurrent fs processes, default is 7")
+    parser.add_option("-c", "--cmd", dest="cmd", default='', help='Additional options to add to recon-all manually; recommended: "-use-gpu -openmp 8", use with -x 1')
+    parser.add_option("-x", "--max", dest="max", type='int', default=4, help="Maximum number of concurrent fs processes, default is 4; This may no longer be necessary with the new openmp support;")
     parser.add_option("-p", "--extpad", dest="extpad", default='_0.dcm', help="The string to pad onto auto-detected subject names, i.e C01-> C01_0.dcm; '_0.dcm' is the default padding string.")
     parser.add_option("-t", "--test", action='store_true', dest="test", default=False, help="Test mode. Don't actually run freesurfer.")
     (options, args) = parser.parse_args()
